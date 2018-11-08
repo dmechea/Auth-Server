@@ -1,0 +1,147 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Auth-Server
+  license:
+    name: MIT
+servers:
+  - url: none
+paths:
+  /auth/login:
+    post:
+      operationId: login
+      description: Login to service using username and password, receive back jwt.
+      requestBody:
+        description: Login credentials of the user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requestBodyLogin'
+      responses:
+        '201':
+          description: Response status and access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/responseLogin"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorUnauthorized"
+
+  /auth/register:
+    post:
+      operationId: register
+      description: Register to create an account
+      requestBody:
+        description: email and password registration details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requestBodyRegister'
+      responses:
+        '201':
+          description: Status of request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/responseSuccessStatus"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorUnauthorized"
+
+  /auth/logout:
+    delete:
+      operationId: logout
+      description: Logout of service
+      responses:
+        '201':
+          description: Status of request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/responseSuccessStatus"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorUnauthorized"
+
+components:
+  schemas:
+    requestBodyLogin:
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: dan@superapi.com
+          description: email address used to register
+        password:
+          type: string
+          example: super_secure_password
+          description: password used to register
+
+    requestBodyRegister:
+      required:
+        - email
+        - password
+        - confirmPassword
+      properties:
+        email:
+          type: string
+          example: dan@superapi.com
+          description: email address used to register
+        password:
+          type: string
+          example: super_secure_password
+          description: password used to register
+        confirmPassword:
+          type: string
+          example: super_secure_password
+          description: password used to register
+
+    responseLogin:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: Login status of user.
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImQzYmYwZTYzLTZlYTMtNDA3YS05NDE4LTRjNzU0YzExYjFmYkB0ZXN0aW5nLmNvbSIsImlhdCI6MTU0MTU4NzkwOSwiZXhwIjoxNTQxNTkxNTA5fQ.btY1WDMtiGwcEIkUibu26_81DeMyHLnFgzlWKHdeonQ
+          description: jwt access token.
+
+    responseSuccessStatus:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: Login status of user.
+
+    errorUnauthorized:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 401
+          description: status code of the error
+        error:
+          type: string
+          example: Unauthorized
+          description: Name of the error
+        message:
+          type: string
+          example: Sorry, you need to be logged in to do that..
+          description: Message about the error.
