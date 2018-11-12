@@ -3,7 +3,7 @@
  */
 
 const axios = require("axios");
-const { port } = require("../../config");
+const { port } = require("../../../config");
 const uuidv4 = require("uuid/v4");
 
 describe("Change Password", () => {

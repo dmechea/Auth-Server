@@ -1,7 +1,7 @@
 const express = require("express");
-const login = require("./login");
-const register = require("./register");
-const logout = require("./logout");
+const login = require("./routes/login");
+const register = require("./routes/register");
+const logout = require("./routes/logout");
 
 require("./models");
 const verifyJwt = require("../../middleware/verification/verifyJwt");
