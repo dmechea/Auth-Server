@@ -208,7 +208,7 @@ describe("Change Password", () => {
     }
   });
 
-  it("should accept a valid type", async () => {
+  it("should accept a valid current password and matching new passwords", async () => {
     const expectedResponseCode = 200;
     const expectedResponseText = "OK";
     const headers = { Authorization: `Bearer ${token}` };
