@@ -12,6 +12,6 @@ const authService = express.Router();
 authService.post("/login", login);
 authService.delete("/logout", verifyJwt, logout);
 authService.post("/register", register);
-authService.put("/password", changePassword);
+authService.put("/password", verifyJwt, changePassword);
 
 module.exports = authService;
