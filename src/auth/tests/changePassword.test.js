@@ -55,8 +55,6 @@ describe("Change Password", () => {
 
     const headers = { Authorization: `Bearer ${token}` };
 
-    console.log(headers);
-    // Throw empty body
     try {
       const passwordResponse = await axios({
         url: `http://localhost:${port}/auth/password`,
@@ -77,7 +75,6 @@ describe("Change Password", () => {
 
     const headers = { Authorization: `Bearer ${token}` };
 
-    // Throw empty body
     try {
       const passwordResponse = await axios({
         url: `http://localhost:${port}/auth/password`,
@@ -98,7 +95,6 @@ describe("Change Password", () => {
 
     const headers = { Authorization: `Bearer ${token}` };
 
-    // Throw empty body
     try {
       const passwordResponse = await axios({
         url: `http://localhost:${port}/auth/password`,
@@ -119,7 +115,6 @@ describe("Change Password", () => {
 
     const headers = { Authorization: `Bearer ${token}` };
 
-    // Throw empty body
     try {
       const passwordResponse = await axios({
         url: `http://localhost:${port}/auth/password`,
@@ -139,7 +134,6 @@ describe("Change Password", () => {
 
     const headers = { Authorization: `Bearer ${token}` };
 
-    // Throw empty body
     try {
       const passwordResponse = await axios({
         url: `http://localhost:${port}/auth/password`,
@@ -164,7 +158,6 @@ describe("Change Password", () => {
 
     const headers = { Authorization: `Bearer ${token}` };
 
-    // Throw empty body
     try {
       const passwordResponse = await axios({
         url: `http://localhost:${port}/auth/password`,
@@ -189,7 +182,6 @@ describe("Change Password", () => {
 
     const headers = { Authorization: `Bearer ${token}` };
 
-    // Throw empty body
     try {
       const passwordResponse = await axios({
         url: `http://localhost:${port}/auth/password`,
@@ -213,23 +205,18 @@ describe("Change Password", () => {
     const expectedResponseText = "OK";
     const headers = { Authorization: `Bearer ${token}` };
 
-    // Throw empty body
-    try {
-      const passwordResponse = await axios({
-        url: `http://localhost:${port}/auth/password`,
-        method: "PUT",
-        data: {
-          currentPassword,
-          newPassword: newPassword,
-          confirmNewPassword
-        },
-        headers
-      });
-      expect(passwordResponse.status).toEqual(expectedResponseCode);
-      expect(passwordResponse.statusText).toEqual(expectedResponseText);
-    } catch (error) {
-      throw Error;
-    }
+    const passwordResponse = await axios({
+      url: `http://localhost:${port}/auth/password`,
+      method: "PUT",
+      data: {
+        currentPassword,
+        newPassword: newPassword,
+        confirmNewPassword
+      },
+      headers
+    });
+    expect(passwordResponse.status).toEqual(expectedResponseCode);
+    expect(passwordResponse.statusText).toEqual(expectedResponseText);
   });
 
   it("should accept a sign-in with new password", async () => {
