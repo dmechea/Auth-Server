@@ -43,6 +43,7 @@ describe("Change Password", () => {
         method: "PUT",
         data: { currentPassword, newPassword, confirmNewPassword }
       });
+      if (passwordResponse) throw Error;
     } catch (error) {
       expect(error.response.status).toEqual(expectedResponseCode);
       expect(error.response.statusText).toEqual(expectedResponseText);
