@@ -228,7 +228,7 @@ describe("Change Password", () => {
     const loginResponse = await axios({
       url: `http://localhost:${port}/auth/login`,
       method: "POST",
-      data: { email, newPassword }
+      data: { email, password: newPassword }
     });
 
     const responseProperties = Object.keys(loginResponse.data);
