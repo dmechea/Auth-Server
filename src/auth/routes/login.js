@@ -1,16 +1,12 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { unauthorized } = require("./errors");
 const boom = require("boom");
 const isString = require("lodash/isString");
-const { secret, expiresIn } = require("../../config").jwt;
+const { secret, expiresIn } = require("../../../config").jwt;
+const { addToken } = require("../../../middleware/whiteList");
+const { compareHash } = require("../tools");
 
-const { addToken } = require("../../middleware/whiteList");
-
-const compareHash = (actualPasswordHash, enteredPassword) => {
-  return bcrypt.compareSync(enteredPassword, actualPasswordHash);
-};
+const unauthorized = "The email or password you have entered is invalid.";
 
 module.exports = (req, res, next) => {
   const { email, password } = req.body;

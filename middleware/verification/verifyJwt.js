@@ -38,7 +38,7 @@ const verifyJwt = (req, res, next) => {
           return next(boom.unauthorized("Invalid Token"));
         }
 
-        res.locals.userEmail = decoded.email;
+        res.locals.email = decoded.email;
 
         return next();
       });
