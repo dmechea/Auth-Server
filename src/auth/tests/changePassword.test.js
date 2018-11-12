@@ -157,6 +157,57 @@ describe("Change Password", () => {
       expect(error.response.statusText).toEqual(expectedResponseText);
     }
   });
+
+  it("should reject incorrect current password", async () => {
+    const expectedResponseCode = 422;
+    const expectedResponseText = "Unprocessable Entity";
+
+    const headers = { Authorization: `Bearer ${token}` };
+
+    // Throw empty body
+    try {
+      const passwordResponse = await axios({
+        url: `http://localhost:${port}/auth/password`,
+        method: "PUT",
+        data: {
+          currentPassword: uuidv4(),
+          newPassword,
+          confirmNewPassword
+        },
+        headers
+      });
+      if (passwordResponse) throw Error;
+    } catch (error) {
+      expect(error.response.status).toEqual(expectedResponseCode);
+      expect(error.response.statusText).toEqual(expectedResponseText);
+    }
+  });
+
+  it("should reject unmatching password confirmation", async () => {
+    const expectedResponseCode = 422;
+    const expectedResponseText = "Unprocessable Entity";
+
+    const headers = { Authorization: `Bearer ${token}` };
+
+    // Throw empty body
+    try {
+      const passwordResponse = await axios({
+        url: `http://localhost:${port}/auth/password`,
+        method: "PUT",
+        data: {
+          currentPassword,
+          newPassword,
+          confirmNewPassword: uuidv4()
+        },
+        headers
+      });
+      if (passwordResponse) throw Error;
+    } catch (error) {
+      expect(error.response.status).toEqual(expectedResponseCode);
+      expect(error.response.statusText).toEqual(expectedResponseText);
+    }
+  });
+
   it("should accept a valid type", async () => {
     const expectedResponseCode = 200;
     const expectedResponseText = "OK";
