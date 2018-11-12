@@ -8,7 +8,7 @@ const uuidv4 = require("uuid/v4");
 
 describe("Change Password", () => {
   beforeAll(async () => {
-    const email = `${uuidv4()}@testing.com`;
+    email = `${uuidv4()}@testing.com`;
 
     password = uuidv4();
     currentPassword = password;
@@ -230,5 +230,23 @@ describe("Change Password", () => {
     } catch (error) {
       throw Error;
     }
+  });
+
+  it("should accept a sign-in with new password", async () => {
+    const expectedResponseCode = 201;
+    const expectedResponseProperties = ["success", "token"];
+
+    // Try to log in with correct password
+    const loginResponse = await axios({
+      url: `http://localhost:${port}/auth/login`,
+      method: "POST",
+      data: { email, newPassword }
+    });
+
+    const responseProperties = Object.keys(loginResponse.data);
+    expect(loginResponse.status).toEqual(expectedResponseCode);
+    expect(responseProperties).toEqual(
+      expect.arrayContaining(expectedResponseProperties)
+    );
   });
 });
