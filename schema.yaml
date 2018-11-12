@@ -75,8 +75,52 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorUnauthorized"
 
+  /auth/password:
+    put:
+      operationId: change_password
+      description: change current user password
+      requestBody:
+        description: current password and new one.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requestBodyChangePassword'
+      responses:
+        '201':
+          description: Status of request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/responseSuccessStatus"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorUnauthorized"
+
 components:
   schemas:
+    requestBodyChangePassword:
+      required:
+        - currentPassword
+        - newPassword
+        - confirmNewPassword
+      properties:
+        currentPassword:
+          type: string
+          example: super_secure_current_password
+          description: current password
+        newPassword:
+          type: string
+          example: super_secure_new_password
+          description: new password
+        confirmNewPassword:
+          type: string
+          example: super_secure_new_password
+          description: confirming new password
+
     requestBodyLogin:
       required:
         - email
