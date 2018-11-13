@@ -53,97 +53,97 @@ describe("Whitelist", () => {
     expect(check).not.toEqual(expect.anything());
   });
 
-  it("should add a token to the whitelist on login", async () => {
+  it("should add a token to the whitelist on login", () => {
     const email = `${uuidv4()}@testing.com`;
     const password = uuidv4();
 
     // create account.
     ////////////////////////////////////
-    const regResponse = await axios({
+    axios({
       url: `http://localhost:${port}/auth/register`,
       method: "POST",
       data: { email, password, confirmPassword: password }
+    }).then(() => {
+      axios({
+        url: `http://localhost:${port}/auth/login`,
+        method: "POST",
+        data: { email, password }
+      }).then(loginResponse => {
+        expect(loginResponse.status).toEqual(201);
+        const token = loginResponse.data.token;
+
+        lookUpToken(token).then(redisCheck => {
+          expect(redisCheck).toEqual(expect.anything());
+        });
+      });
     });
-    ////////////////////////////////////
-
-    // log in with correct password
-    ////////////////////////////////////
-    const loginResponse = await axios({
-      url: `http://localhost:${port}/auth/login`,
-      method: "POST",
-      data: { email, password }
-    });
-    expect(loginResponse.status).toEqual(201);
-    /////////////////////////////////////
-
-    const token = loginResponse.data.token;
-    const redisCheck = await lookUpToken(token);
-
-    expect(redisCheck).toEqual(expect.anything());
   });
 
-  it("should remove token from the whitelist on logout", async () => {
+  it("should remove token from the whitelist on logout", () => {
     const email = `${uuidv4()}@testing.com`;
     const password = uuidv4();
 
     // create account.
     ////////////////////////////////////
-    const regResponse = await axios({
+    axios({
       url: `http://localhost:${port}/auth/register`,
       method: "POST",
       data: { email, password, confirmPassword: password }
-    });
-    ////////////////////////////////////
+    }).then(() => {
+      axios({
+        url: `http://localhost:${port}/auth/login`,
+        method: "POST",
+        data: { email, password }
+      }).then(loginResponse => {
+        expect(loginResponse.status).toEqual(201);
+        const token = loginResponse.data.token;
 
-    // log in with correct password
-    ////////////////////////////////////
-    const loginResponse = await axios({
-      url: `http://localhost:${port}/auth/login`,
-      method: "POST",
-      data: { email, password }
-    });
-    expect(loginResponse.status).toEqual(201);
-    /////////////////////////////////////
+        lookUpToken(token).then(redisCheck => {
+          expect(redisCheck).toEqual(expect.anything());
 
-    const token = loginResponse.data.token;
-    const redisCheck = await lookUpToken(token);
-    expect(redisCheck).toEqual(expect.anything());
-
-    const logoutResponse = await axios({
-      url: `http://localhost:${port}/auth/logout`,
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` }
+          axios({
+            url: `http://localhost:${port}/auth/logout`,
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+          }).then(() => {
+            //
+            lookUpToken(token).then(redisCheck2 => {
+              expect(redisCheck2).not.toEqual(expect.anything());
+            });
+          });
+        });
+      });
     });
-    const redisCheck2 = await lookUpToken(token);
-    expect(redisCheck2).not.toEqual(expect.anything());
   });
 
-  it("should remove token from the whitelist on authentication failure", async () => {
+  it("should remove token from the whitelist on authentication failure", () => {
     // add a fake token
     const token = "THIS_IS_A_FAKE_TOKEN";
 
-    const status = await addToken(token, "value");
-    expect(status).toEqual("OK");
+    addToken(token, "value").then(status => {
+      expect(status).toEqual("OK");
 
-    const entry = await lookUpToken(token);
-    expect(entry).toEqual(expect.anything());
+      lookUpToken(token).then(entry => {
+        expect(entry).toEqual(expect.anything());
 
-    // Try and fail authenticated route with garbage token
-    try {
-      const response = await axios({
-        url: `http://localhost:${port}/test/verify_jwt`,
-        headers: { authorization: `Bearer ${token}` }
+        axios({
+          url: `http://localhost:${port}/test/verify_jwt`,
+          headers: { authorization: `Bearer ${token}` }
+        })
+          .then(() => {
+            // Shouldn't Pass
+            throw Error;
+          })
+          .catch(error => {
+            expect(error.response.status).toEqual(401);
+
+            lookUpToken(token).then(entry2 => {
+              expect(entry2).not.toEqual(expect.anything());
+            });
+          });
       });
-    } catch (error) {
-      expect(error.response.status).toEqual(401);
-    }
+    });
 
     // Whitelist remove garbage token
-    const entry2 = await lookUpToken(token);
-    expect(entry2).not.toEqual(expect.anything());
-  });
-
-  afterAll(() => {
-    client.quit();
   });
 });

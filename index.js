@@ -12,6 +12,8 @@ const mongoDB = `mongodb://127.0.0.1/${dbName}`;
 const errorHandler = require("./middleware/errorHandler");
 const routes = require("./routes");
 
+const authServer = options => {};
+
 // Import and use body-parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

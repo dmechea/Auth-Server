@@ -14,7 +14,6 @@ const verifyJwt = (req, res, next) => {
   }
 
   const token = authorization.split(" ")[1]; // get the token part and leave out 'Bearer'
-
   // Check the whitelist, If whitelist is good then you can verify
   lookUpToken(token)
     .then(value => {

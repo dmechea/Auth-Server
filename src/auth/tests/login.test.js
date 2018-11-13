@@ -107,35 +107,36 @@ describe("Login", () => {
     }
   });
 
-  it("should reject a correct email with an incorrect password with status 401", async () => {
+  it("should reject a correct email with an incorrect password with status 401", () => {
     const expectedResponseCode = 401;
     const expectedResponseText = "Unauthorized";
 
     const email = `${uuidv4()}@testing.com`;
     const password = uuidv4();
-
     // create account.
-    const regResponse = await axios({
+    axios({
       url: `http://localhost:${port}/auth/register`,
       method: "POST",
       data: { email, password, confirmPassword: password }
-    });
-
-    // Try to log in with random password.
-    try {
-      const loginResponse = await axios({
+    }).then(() => {
+      //
+      // Login
+      axios({
         url: `http://localhost:${port}/auth/login`,
         method: "POST",
         data: { email, password: uuidv4() }
-      });
-      if (loginResponse) throw new Error();
-    } catch (error) {
-      expect(error.response.status).toEqual(expectedResponseCode);
-      expect(error.response.statusText).toEqual(expectedResponseText);
-    }
+      })
+        .then(() => {
+          throw Error;
+        })
+        .catch(error => {
+          expect(error.response.status).toEqual(expectedResponseCode);
+          expect(error.response.statusText).toEqual(expectedResponseText);
+        });
+    });
   });
 
-  it("should accept a correct email and password, responding with a 201", async () => {
+  it("should accept a correct email and password, responding with a 201", () => {
     const expectedResponseCode = 201;
     const expectedResponseProperties = ["success", "token"];
 
@@ -143,22 +144,24 @@ describe("Login", () => {
     const password = uuidv4();
 
     // create account.
-    const regResponse = await axios({
+    axios({
       url: `http://localhost:${port}/auth/register`,
       method: "POST",
       data: { email, password, confirmPassword: password }
+    }).then(() => {
+      //
+      // Login
+      axios({
+        url: `http://localhost:${port}/auth/login`,
+        method: "POST",
+        data: { email, password }
+      }).then(loginResponse => {
+        const responseProperties = Object.keys(loginResponse.data);
+        expect(loginResponse.status).toEqual(expectedResponseCode);
+        expect(responseProperties).toEqual(
+          expect.arrayContaining(expectedResponseProperties)
+        );
+      });
     });
-
-    // Try to log in with correct password
-    const loginResponse = await axios({
-      url: `http://localhost:${port}/auth/login`,
-      method: "POST",
-      data: { email, password }
-    });
-    const responseProperties = Object.keys(loginResponse.data);
-    expect(loginResponse.status).toEqual(expectedResponseCode);
-    expect(responseProperties).toEqual(
-      expect.arrayContaining(expectedResponseProperties)
-    );
   });
 });
