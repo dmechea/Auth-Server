@@ -14,8 +14,6 @@ const WhiteList = require("./middleware/whiteList");
 const errorHandler = require("./middleware/errorHandler");
 const routes = require("./routes");
 
-// app.use(authServer())
-
 // Import and use body-parser
 
 const authServerConnectTo = options => {

@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const boom = require("boom");
 const isString = require("lodash/isString");
 const { secret, expiresIn } = require("../../../config").jwt;
-// const { addToken } = require("../../../middleware/whiteList");
 const { compareHash } = require("../tools");
 
 const unauthorized = "The email or password you have entered is invalid.";

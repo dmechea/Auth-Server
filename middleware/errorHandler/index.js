@@ -1,4 +1,3 @@
-const { removeToken } = require("../whiteList");
 const boom = require("boom");
 
 module.exports = (err, req, res, next) => {
