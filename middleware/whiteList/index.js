@@ -1,35 +1,39 @@
 // redisDemo.js
 const Promise = require("bluebird");
-
-const redis = Promise.promisifyAll(require("redis"));
+// const redis = Promise.promisifyAll(require("redis"));
 
 // bluebird.promisifyAll(redis);
-const client = redis.createClient(); // this creates a new client
+// const client = redis.createClient(); // this creates a new client
 
-client.on("connect", () => {
-  console.log("Redis client connected");
-});
+module.exports = class Whitelist {
+  constructor(redis) {
+    this.redis = Promise.promisifyAll(redis);
+    this.client = redis.createClient();
 
-client.on("error", err => {
-  console.log("Something went wrong " + err);
-});
+    this.client.on("connect", () => {
+      console.log("Redis client connected");
+    });
 
-const addToken = async (token, value) => {
-  return await client.setAsync(token, value);
+    this.client.on("error", err => {
+      console.log("Something went wrong " + err);
+    });
+  }
+
+  async addToken(token, value) {
+    return await this.client.setAsync(token, value);
+  }
+
+  async removeToken(token) {
+    return await this.client.delAsync(token);
+  }
+
+  async lookUpToken(token) {
+    if (!token) return null;
+    return await this.client.getAsync(token);
+  }
+
+  // Will wipe out the whole whitelist
+  async flushTokens() {
+    return this.client.flushdbAsync();
+  }
 };
-
-const removeToken = async token => {
-  return await client.delAsync(token);
-};
-
-const lookUpToken = async token => {
-  if (!token) return null;
-  return await client.getAsync(token);
-};
-
-// Will wipe out the whole whitelist
-const flushTokens = async () => {
-  return client.flushdbAsync();
-};
-
-module.exports = { addToken, removeToken, lookUpToken, flushTokens, client };

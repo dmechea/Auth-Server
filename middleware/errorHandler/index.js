@@ -2,7 +2,7 @@ const { removeToken } = require("../whiteList");
 const boom = require("boom");
 
 module.exports = (err, req, res, next) => {
-  const { token } = res.locals;
+  const { whitelist, token } = res.locals;
 
   if (err.isServer) {
     console.log(err);
@@ -17,7 +17,8 @@ module.exports = (err, req, res, next) => {
   */
 
   if (token && parseInt(statusCode) === 401) {
-    removeToken(token)
+    whitelist
+      .removeToken(token)
       .then(() => {
         res.status(statusCode).send(err.output.payload);
       })

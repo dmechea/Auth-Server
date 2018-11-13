@@ -5,9 +5,11 @@ const { port, dbName } = require("./config");
 
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
-
+const redis = require("redis");
 // Import mongoose and instruct it to connect to our database.
 const mongoose = require("mongoose");
+
+const WhiteList = require("./middleware/whiteList");
 
 const errorHandler = require("./middleware/errorHandler");
 const routes = require("./routes");
@@ -32,8 +34,15 @@ const authServerConnectTo = options => {
     mongooseSettings
   );
 
+  const whitelist = new WhiteList(redis);
+
   options.app.use(bodyParser.json());
   options.app.use(bodyParser.urlencoded({ extended: true }));
+
+  app.use((req, res, next) => {
+    res.locals.whitelist = whitelist;
+    return next();
+  });
 
   routes.forEach(route => {
     const service = express.Router();
@@ -45,7 +54,11 @@ const authServerConnectTo = options => {
   });
 };
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   authServerConnectTo({ app });
   console.log(`Listening on port ${port}!`);
 });
+
+// server.close(() => {
+//   console.log("closing ");
+// });

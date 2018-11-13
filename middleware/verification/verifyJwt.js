@@ -1,12 +1,12 @@
 const jwt = require("jsonwebtoken");
 const boom = require("boom");
 const { secret } = require("../../config").jwt;
-const { lookUpToken } = require("../whiteList");
 
 const unauthorized_message = "Sorry, you need to be logged in to do that..";
 
 const verifyJwt = (req, res, next) => {
   const { authorization } = req.headers;
+  const { whitelist } = res.locals;
 
   // Didn't send a token or it's null
   if (!authorization) {
@@ -15,7 +15,8 @@ const verifyJwt = (req, res, next) => {
 
   const token = authorization.split(" ")[1]; // get the token part and leave out 'Bearer'
   // Check the whitelist, If whitelist is good then you can verify
-  lookUpToken(token)
+  whitelist
+    .lookUpToken(token)
     .then(value => {
       if (!value)
         return next(boom.unauthorized("Token is not on the whitelist"));

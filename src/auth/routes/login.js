@@ -3,13 +3,15 @@ const jwt = require("jsonwebtoken");
 const boom = require("boom");
 const isString = require("lodash/isString");
 const { secret, expiresIn } = require("../../../config").jwt;
-const { addToken } = require("../../../middleware/whiteList");
+// const { addToken } = require("../../../middleware/whiteList");
 const { compareHash } = require("../tools");
 
 const unauthorized = "The email or password you have entered is invalid.";
 
 module.exports = (req, res, next) => {
   const { email, password } = req.body;
+  const { whitelist } = res.locals;
+
   if (!email || !password)
     return next(boom.badData("Missing email or password"));
 
@@ -32,7 +34,8 @@ module.exports = (req, res, next) => {
 
       // Just adding a timestamp on creation for now. Not sure what to implement yet?
       // I figured timestamp could be used later to disqualify / garbage collect tokens.
-      addToken(token, +new Date())
+      whitelist
+        .addToken(token, +new Date())
         .then(response => {
           return res.status(201).send({ success: true, token });
         })

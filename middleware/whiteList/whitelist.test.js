@@ -2,14 +2,8 @@
  * @jest-environment node
  */
 
-const {
-  addToken,
-  removeToken,
-  lookUpToken,
-  flushTokens,
-  client
-} = require("./index");
-
+const Whitelist = require("./index");
+const redis = require("redis");
 const axios = require("axios");
 const { port } = require("../../config");
 const uuidv4 = require("uuid/v4");
@@ -22,34 +16,35 @@ const uuidv4 = require("uuid/v4");
 
 describe("Whitelist", () => {
   beforeEach(() => {
-    flushTokens();
+    whitelist = new Whitelist(redis);
+    whitelist.flushTokens();
   });
 
   it("should correctly add an entry to redis", async () => {
-    const status = await addToken("token", "value");
+    const status = await whitelist.addToken("token", "value");
     expect(status).toEqual("OK");
 
-    const entry = await lookUpToken("token");
+    const entry = await whitelist.lookUpToken("token");
     expect(entry).toEqual(expect.anything());
     expect(entry).toEqual("value");
   });
 
   it("should throw null for a random entry", async () => {
-    const entry = await lookUpToken(uuidv4());
+    const entry = await whitelist.lookUpToken(uuidv4());
     expect(entry).not.toEqual(expect.anything());
   });
 
   it("should add and remove an entry", async () => {
-    const status = await addToken("token", "value");
+    const status = await whitelist.addToken("token", "value");
     expect(status).toEqual("OK");
 
-    const entry = await lookUpToken("token");
+    const entry = await whitelist.lookUpToken("token");
     expect(entry).toEqual(expect.anything());
     expect(entry).toEqual("value");
 
-    const removed = await removeToken("token");
+    const removed = await whitelist.removeToken("token");
 
-    const check = await lookUpToken("token");
+    const check = await whitelist.lookUpToken("token");
     expect(check).not.toEqual(expect.anything());
   });
 
@@ -72,7 +67,7 @@ describe("Whitelist", () => {
         expect(loginResponse.status).toEqual(201);
         const token = loginResponse.data.token;
 
-        lookUpToken(token).then(redisCheck => {
+        whitelist.lookUpToken(token).then(redisCheck => {
           expect(redisCheck).toEqual(expect.anything());
         });
       });
@@ -98,7 +93,7 @@ describe("Whitelist", () => {
         expect(loginResponse.status).toEqual(201);
         const token = loginResponse.data.token;
 
-        lookUpToken(token).then(redisCheck => {
+        whitelist.lookUpToken(token).then(redisCheck => {
           expect(redisCheck).toEqual(expect.anything());
 
           axios({
@@ -107,7 +102,7 @@ describe("Whitelist", () => {
             headers: { Authorization: `Bearer ${token}` }
           }).then(() => {
             //
-            lookUpToken(token).then(redisCheck2 => {
+            whitelist.lookUpToken(token).then(redisCheck2 => {
               expect(redisCheck2).not.toEqual(expect.anything());
             });
           });
@@ -120,10 +115,10 @@ describe("Whitelist", () => {
     // add a fake token
     const token = "THIS_IS_A_FAKE_TOKEN";
 
-    addToken(token, "value").then(status => {
+    whitelist.addToken(token, "value").then(status => {
       expect(status).toEqual("OK");
 
-      lookUpToken(token).then(entry => {
+      whitelist.lookUpToken(token).then(entry => {
         expect(entry).toEqual(expect.anything());
 
         axios({
@@ -137,7 +132,7 @@ describe("Whitelist", () => {
           .catch(error => {
             expect(error.response.status).toEqual(401);
 
-            lookUpToken(token).then(entry2 => {
+            whitelist.lookUpToken(token).then(entry2 => {
               expect(entry2).not.toEqual(expect.anything());
             });
           });
