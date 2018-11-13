@@ -8,37 +8,44 @@ const morgan = require("morgan");
 
 // Import mongoose and instruct it to connect to our database.
 const mongoose = require("mongoose");
-const mongoDB = `mongodb://127.0.0.1/${dbName}`;
+
 const errorHandler = require("./middleware/errorHandler");
 const routes = require("./routes");
 
+// app.use(authServer())
+
 // Import and use body-parser
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(morgan("dev"));
+const authServerConnectTo = options => {
+  const dbHost = options.dbHost ? options.dbHost : "mongodb://127.0.0.1/";
+  const dbName = options.dbName ? options.dbName : "my_db";
+  const mongooseSettings = options.mongooseSettings
+    ? options.mongooseSettings
+    : {
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useFindAndModify: false
+      };
 
-mongoose.connect(
-  mongoDB,
-  {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindAndModify: false
-  }
-);
+  mongoose.connect(
+    `${dbHost}${dbName}`,
+    mongooseSettings
+  );
 
-routes.forEach(route => {
-  const service = express.Router();
-  // Attach the routers own service instance
-  service.use(route.service);
+  options.app.use(bodyParser.json());
+  options.app.use(bodyParser.urlencoded({ extended: true }));
 
-  console.log("Adding Route: ", route.endpoint);
-
-  app.use(route.endpoint, service);
-});
-
-app.use(errorHandler);
+  routes.forEach(route => {
+    const service = express.Router();
+    // Attach the routers own service instance
+    service.use(route.service);
+    console.log("Adding Route: ", route.endpoint);
+    app.use(route.endpoint, service);
+    app.use(errorHandler);
+  });
+};
 
 app.listen(port, () => {
+  authServerConnectTo({ app });
   console.log(`Listening on port ${port}!`);
 });
