@@ -1,18 +1,14 @@
 // redisDemo.js
 const Promise = require("bluebird");
-// const redis = Promise.promisifyAll(require("redis"));
-
-// bluebird.promisifyAll(redis);
-// const client = redis.createClient(); // this creates a new client
 
 module.exports = class Whitelist {
   constructor(redis) {
     this.redis = Promise.promisifyAll(redis);
     this.client = redis.createClient();
 
-    this.client.on("connect", () => {
-      console.log("Redis client connected");
-    });
+    // this.client.on("connect", () => {
+    //   console.log("Redis client connected");
+    // });
 
     this.client.on("error", err => {
       console.log("Something went wrong " + err);
@@ -35,5 +31,10 @@ module.exports = class Whitelist {
   // Will wipe out the whole whitelist
   async flushTokens() {
     return this.client.flushdbAsync();
+  }
+
+  shutdown() {
+    this.flushTokens();
+    this.client.quit();
   }
 };
